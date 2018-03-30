@@ -160,7 +160,8 @@ static void print_result(const char *cardname, int cardlen, long byte_offset)
   /* UG, totally hacky way to look for request_id */
   if (request_id_char >= 0) {
     int match = 1;
-    for (int pos_text = 0; pos_text < request_length; pos_text++) {
+    int pos_text;
+    for (pos_text = 0; pos_text < request_length; pos_text++) {
       if (ccsrch_buf[request_id_char+pos_text] != request_text[pos_text]) {
         match = 0;
         break;
