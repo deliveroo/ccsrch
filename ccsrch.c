@@ -80,6 +80,7 @@ static int    mask_card_number     = 0;
 static int    limit_ascii          = 0;
 static int    ignore_count         = 0;
 static int    wrap                 = 0;
+static int    ignore_gps           = 0;
 
 static void initialize_buffer()
 {
@@ -487,7 +488,10 @@ static int ccsrch(const char *filename)
 
     for (ccsrch_index=0; ccsrch_index<cnt && limit_exceeded==0; ccsrch_index++) {
       /* check to see if our data is 0...9 (based on ACSII value) */
-      if (isdigit(ccsrch_buf[ccsrch_index])) {
+      /* Riley note: try to ignore if digit appears after  \d\. digit then dot. Probably GPS */
+      if (isdigit(ccsrch_buf[ccsrch_index])
+          && (!ignore_gps || (ccsrch_buf[ccsrch_index-1] != '.' || !isdigit(ccsrch_buf[ccsrch_index-2]))
+          )) {
         check = 1;
         cardbuf[counter] = ((int)ccsrch_buf[ccsrch_index])-'0';
         counter++;
@@ -776,6 +780,7 @@ static void usage(const char *progname)
   printf("    -n <list>      File extensions to exclude (i.e .dll,.exe)\n");
   printf("    -m\t\t   Mask the PAN number.\n");
   printf("    -w\t\t   Check for card matches wrapped across lines.\n");
+  printf("    -g\t\t   Try to ignore GPS coordinates looking for DD.DDDDDD type formats.\n");
   printf("    -h\t\t   Usage information\n\n");
   printf("See https://github.com/adamcaudill/ccsrch for more information.\n\n");
   exit(0);
@@ -852,7 +857,7 @@ int main(int argc, char *argv[])
   if (argc < 2)
     usage(argv[0]);
 
-  while ((c = getopt(argc, argv,"abefi:jt:To:cml:n:sw")) != -1) {
+  while ((c = getopt(argc, argv,"abefi:jt:To:cml:n:swg")) != -1) {
       switch (c) {
         case 'a':
           limit_ascii = 1;
@@ -914,6 +919,9 @@ int main(int argc, char *argv[])
         	break;
         case 'w':
         	wrap = 1;
+        	break;
+        case 'g':
+        	ignore_gps = 1;
         	break;
         case 'h':
         default:
