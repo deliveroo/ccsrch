@@ -143,15 +143,34 @@ static void print_result(const char *cardname, int cardlen, long byte_offset)
   char	cdatebuf[CARDTYPELEN];
   char	trackbuf[MDBUFSIZE];
   int   char_before = ccsrch_index - cardlen - ignore_count;
+  int   request_id_char = ccsrch_index - cardlen - ignore_count - 10;
+  int request_length = 11;
+  char request_text[11] = "request_id=";
 
   /* If char directly before or after card are a number, don't print */
   if ((char_before >= 0 && isdigit(ccsrch_buf[char_before])) ||
-      isdigit(ccsrch_buf[ccsrch_index+1]))
+      isdigit(ccsrch_buf[ccsrch_index+1])) {
     return;
-  /* If char directly before or after card are letters */
+  }
+  /* If char directly before or after card are letters. Probably GUID */
   if ((char_before >= 0 && isalpha(ccsrch_buf[char_before])) ||
-      isalpha(ccsrch_buf[ccsrch_index+1]))
+      isalpha(ccsrch_buf[ccsrch_index+1])) {
     return;
+  }
+  /* UG, totally hacky way to look for request_id */
+  if (request_id_char >= 0) {
+    int match = 1;
+    for (int pos_text = 0; pos_text < request_length; pos_text++) {
+      if (ccsrch_buf[request_id_char+pos_text] != request_text[pos_text]) {
+        match = 0;
+        break;
+      }
+    }
+    if (match) {
+      return;
+    }
+
+  }
 
   memset(&nbuf, '\0', sizeof(nbuf));
 
