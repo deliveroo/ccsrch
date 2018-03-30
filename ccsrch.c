@@ -148,6 +148,10 @@ static void print_result(const char *cardname, int cardlen, long byte_offset)
   if ((char_before >= 0 && isdigit(ccsrch_buf[char_before])) ||
       isdigit(ccsrch_buf[ccsrch_index+1]))
     return;
+  /* If char directly before or after card are letters */
+  if ((char_before >= 0 && isalpha(ccsrch_buf[char_before])) ||
+      isalpha(ccsrch_buf[ccsrch_index+1]))
+    return;
 
   memset(&nbuf, '\0', sizeof(nbuf));
 
